@@ -1,5 +1,16 @@
-@import "@tomtom-international/web-sdk-maps";
-#map {
-  height: 90vh;
-  width: 90vw;
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.nav {
+  height: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.selected {
+  background-color: #d3d1d1;
 }
