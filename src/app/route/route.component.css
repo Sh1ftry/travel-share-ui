@@ -1,0 +1,30 @@
+@import "@tomtom-international/web-sdk-maps";
+#map {
+  height: 100vh;
+}
+
+.row {
+  display: flex;
+}
+
+.left {
+  flex-grow: 1;
+  height: 100vh;
+  padding: 20px;
+}
+
+.right {
+  flex-grow: 6;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.container {
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+}
