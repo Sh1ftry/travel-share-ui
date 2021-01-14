@@ -1,41 +1,82 @@
-<div class="row">
+<div class="row" xmlns="http://www.w3.org/1999/html">
   <div class="left">
     <div class="container">
       <h1>Route details</h1>
-      <mat-form-field class="full-width">
-        <mat-label>Average fuel consumption</mat-label>
-        <input matInput placeholder="Average fuel consuption" value="6.3">
+      <mat-form-field class="full-width" appearance="standard">
+        <mat-label>Route name</mat-label>
+        <input matInput>
+        <mat-icon matSuffix>create</mat-icon>
       </mat-form-field>
       <br>
-      <mat-form-field class="full-width">
-        <mat-label>Fuel price per liter</mat-label>
-        <input matInput placeholder="Fuel price per liter" value="5.37">
+      <mat-form-field class="small" appearance="standard">
+        <mat-label>Average fuel consumption</mat-label>
+        <input matInput>
+        <mat-icon matSuffix>local_gas_station</mat-icon>
       </mat-form-field>
+      <mat-form-field class="small" appearance="standard">
+        <mat-label>Fuel price per liter</mat-label>
+        <input matInput>
+        <mat-icon matSuffix>local_atm</mat-icon>
+      </mat-form-field>
+      <mat-form-field class="small" appearance="standard">
+        <mat-label>Date</mat-label>
+        <input matInput [matDatepicker]="picker">
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-icon matSuffix style="cursor: pointer" (click)="picker.open()">calendar_today</mat-icon>
+      </mat-form-field>
+      <br>
       <button class="button" mat-raised-button>Calculate</button>
+      <button class="button" mat-raised-button>Cancel</button>
     </div>
 
-    <div class="container">
+    <div class="container" [formGroup]="waypointsForms">
       <h1>Waypoints</h1>
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
+      <mat-accordion>
+        <mat-expansion-panel formArrayName="forms" *ngFor="let waypoint of waypoints">
+          <mat-expansion-panel-header>
+            <mat-panel-title style="display: flex; align-items: center;">
+              <mat-icon>place</mat-icon>
+              {{waypoint.address}}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-form-field class="full-width" appearance="standard" [formGroupName]="waypoint.position">
+            <mat-label>Add a passenger</mat-label>
+            <input formControlName="name" matInput>
+            <mat-icon (click)="addTraveller(waypoint.position);" matSuffix>group_add</mat-icon>
+          </mat-form-field>
+          <div class="example-container">
+            <h2>Travelling</h2>
 
-        <!--- Note that these columns can be defined in any order.
-              The actual rendered columns are set as a property on the row definition" -->
+            <div
+              cdkDropList
+              #travellingList="cdkDropList"
+              [cdkDropListData]="getTravelling(waypoint.position)"
+              [cdkDropListConnectedTo]="[leftList]"
+              class="example-list"
+              (cdkDropListDropped)="drop($event)">
+              <div class="example-box" *ngFor="let person of getTravelling(waypoint.position)" cdkDrag>
+                {{person.getFullName()}}
+                <mat-icon (click)="addTraveller(waypoint.position);" matSuffix>delete</mat-icon>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="example-container">
+            <h2>Left</h2>
 
-        <!-- Position Column -->
-        <ng-container matColumnDef="position">
-          <th mat-header-cell *matHeaderCellDef> No. </th>
-          <td mat-cell *matCellDef="let element"> {{element.position}} </td>
-        </ng-container>
-
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef> Address </th>
-          <td mat-cell *matCellDef="let element"> {{element.address}} </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+            <div
+              cdkDropList
+              #leftList="cdkDropList"
+              [cdkDropListData]="waypoint.getOut"
+              [cdkDropListConnectedTo]="[travellingList]"
+              class="example-list"
+              (cdkDropListDropped)="drop($event)">
+              <div class="example-box" *ngFor="let person of waypoint.getOut" cdkDrag>{{person.getFullName()}}</div>
+            </div>
+          </div>
+          <br>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
 
   </div>
