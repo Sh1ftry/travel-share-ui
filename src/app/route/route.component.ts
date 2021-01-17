@@ -66,7 +66,7 @@ export class RouteComponent implements OnInit {
   ngOnInit(): void {
     const center = [19.356389, 52.196667];
     this.map = tt.map({
-      key: this.API_KEY,
+      key: environment.tomtomApiKey,
       container: 'map',
       center,
       zoom: 7,

@@ -2,14 +2,12 @@ import { Injectable } from '@angular/core';
 import {EMPTY, from, Observable, of} from 'rxjs';
 import { map } from 'rxjs/operators';
 import tt from '@tomtom-international/web-sdk-services';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TomTomService {
-
-  API_KEY = '';
-
   private static getLocationsString(locations): string {
     return locations.reduce((result, location) => {
       return result + location.lng + ',' + location.lat + ':';
@@ -19,7 +17,7 @@ export class TomTomService {
   reverseGeocode(position): Observable<object> {
     // @ts-ignore
     return from(tt.services.reverseGeocode({
-      key: this.API_KEY,
+      key: environment.tomtomApiKey,
       language: 'en-US',
       position
     }).go()).pipe(map(response => {
@@ -34,7 +32,7 @@ export class TomTomService {
     if (locations.includes(':'))
     {
       return from(tt.services.calculateRoute({
-        key: this.API_KEY,
+        key: environment.tomtomApiKey,
         traffic: false,
         locations
       }).go()).pipe(map(response => {
