@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
@@ -11,7 +11,6 @@ export interface Friends {
   name: string;
   surname: string;
   email: string;
-  password: string;
 }
 
 /* const ELEMENT_DATA: Friends[] = [
@@ -27,14 +26,6 @@ export interface Friends {
   {position: 10, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
 ]; */
 
-/*const ELEMENT_DATA: Friends[] = [
-  { name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  { name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  { name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-];*/
-
 @Component({
   selector: 'app-friends',
   templateUrl: './friends.component.html',
@@ -46,11 +37,11 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     Validators.email,
   ]);
 
-  friends: string[] = [];
-
   displayedColumns: string[] = ['position', 'name', 'surname', 'email', 'delete'];
   ELEMENT_DATA: Friends[] = [];
   dataSource = new MatTableDataSource<Friends>(this.ELEMENT_DATA);
+  emailForm: string;
+  foundUser = '';
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -66,15 +57,47 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     this.dataSource.sort = this.sort;
   }
 
-  openDialog(): any {
-     this.dialog.open(NoneUserFoundDialogComponent);
+  public getAllFriends(): void{
+    this.service.getAllByUserId(1).subscribe(friends => {
+      this.dataSource.data =  friends.map((friend, index) => { return {...friend, position: index + 1};
+      } );
+    });
   }
 
-  public getAllFriends(): void{
-    this.service.getAllByUserId(1).subscribe(friend => {
-      this.friends = friend;
-      this.dataSource.data = friend as Friends[];
-    } );
+  public addFriend(): void{
+
+    let errorText;
+    const emailInput = this.emailForm;
+    this.service.findByEmail(emailInput).subscribe(friend => {
+        this.foundUser = friend;
+        const data = {
+          email: this.emailForm
+        };
+        this.service.addFriend(1, data).subscribe(user => {
+          window.location.reload();
+        });
+
+      }, (error) => {
+        errorText = error;
+        console.log(error);
+        this.dialog.open(NoneUserFoundDialogComponent);
+      });
+  }
+
+  public deleteFriend(e): void {
+    const data = {
+      email: e.email
+    };
+
+    this.service.delete(1, data).subscribe({
+        next: response => {
+          console.log('Delete successful');
+        },
+        error: error => {
+          console.error('There was an error!', error);
+        }
+      });
+    window.location.reload();
   }
 }
 

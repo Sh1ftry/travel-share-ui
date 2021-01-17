@@ -3,7 +3,7 @@
     <form class="email-form">
       <mat-form-field class="email-field">
         <mat-label>Email</mat-label>
-        <input type="email" matInput [formControl]="emailFormControl" placeholder="Ex. pat@example.com">
+        <input type="email" [(ngModel)]="emailForm" name="emailForm" matInput [formControl]="emailFormControl" placeholder="Ex. pat@example.com">
         <mat-error *ngIf="emailFormControl.hasError('email') && !emailFormControl.hasError('required')">
           Please enter a valid email address
         </mat-error>
@@ -12,13 +12,12 @@
         </mat-error>
         <mat-icon class="email-icon" matSuffix> email</mat-icon>
       </mat-form-field>
-      <button class="button" mat-raised-button (click)="openDialog()" type="button">
+      <button class="button" mat-raised-button (click)="addFriend()" type="button">
         <mat-icon>group_add</mat-icon>
       </button>
     </form>
   </div>
   <div class="grid-table">
-    <p>{{friends}}!</p>
     <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z0">
 
       <!-- Position Column-->
@@ -47,9 +46,9 @@
 
       <!-- Delete Column -->
       <ng-container matColumnDef="delete" class="mat-column-delete">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
-        <td mat-cell *matCellDef="let element">
-          <button mat-icon-button aria-label="Delete friends" ng-click="deleteRow($index)">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button aria-label="Delete friends" (click)="deleteFriend(row)">
             <mat-icon>delete_outline</mat-icon>
           </button>
         </td>
