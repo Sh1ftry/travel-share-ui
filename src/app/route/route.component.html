@@ -1,80 +1,105 @@
 <div class="row" xmlns="http://www.w3.org/1999/html">
   <div class="left">
-    <div class="container">
+    <div class="container" [formGroup]="routeDetailsForm">
       <h1>Route details</h1>
       <mat-form-field class="full-width" appearance="standard">
         <mat-label>Route name</mat-label>
-        <input matInput>
+        <input formControlName="routeName" matInput>
+        <mat-error *ngIf="routeDetailsForm.controls.date.errors?.required">
+          Please enter a route name
+        </mat-error>
         <mat-icon matSuffix>create</mat-icon>
       </mat-form-field>
-      <br>
-      <mat-form-field class="small" appearance="standard">
-        <mat-label>Average fuel consumption</mat-label>
-        <input matInput>
+      <mat-form-field class="full-width" appearance="standard">
+        <mat-label>Average fuel consumption per 100km</mat-label>
+        <input formControlName="consumption" matInput>
         <mat-icon matSuffix>local_gas_station</mat-icon>
+        <mat-error
+          *ngIf="routeDetailsForm.controls.date.errors?.invalidFloat || routeDetailsForm.controls.date.errors?.required"
+        >
+          Please enter a valid fuel consumption
+        </mat-error>
       </mat-form-field>
-      <mat-form-field class="small" appearance="standard">
+      <mat-form-field class="full-width" appearance="standard">
         <mat-label>Fuel price per liter</mat-label>
-        <input matInput>
+        <input formControlName="price" matInput>
         <mat-icon matSuffix>local_atm</mat-icon>
+        <mat-error
+          *ngIf="routeDetailsForm.controls.date.errors?.invalidFloat || routeDetailsForm.controls.date.errors?.required"
+        >
+          Please enter a valid fuel price
+        </mat-error>
       </mat-form-field>
-      <mat-form-field class="small" appearance="standard">
+      <mat-form-field class="full-width" appearance="standard">
         <mat-label>Date</mat-label>
-        <input matInput [matDatepicker]="picker">
+        <input formControlName="date" matInput [matDatepicker]="picker">
         <mat-datepicker #picker></mat-datepicker>
         <mat-icon matSuffix style="cursor: pointer" (click)="picker.open()">calendar_today</mat-icon>
+        <mat-error
+          *ngIf="routeDetailsForm.controls.date.errors?.invalidDate || routeDetailsForm.controls.date.errors?.required"
+        >
+          Please enter a valid date
+        </mat-error>
       </mat-form-field>
       <br>
-      <button class="button" mat-raised-button>Calculate</button>
-      <button class="button" mat-raised-button>Cancel</button>
+      <button class="button" (click)="calculate();" mat-raised-button>Calculate</button>
+      <button class="button" (click)="cancel();" mat-raised-button>Cancel</button>
     </div>
 
     <div class="container" [formGroup]="waypointsForms">
       <h1>Waypoints</h1>
+      <p *ngIf="this.waypoints.length == 0" >Click anywhere on the map to add waypoints.</p>
       <mat-accordion>
-        <mat-expansion-panel formArrayName="forms" *ngFor="let waypoint of waypoints">
+        <mat-expansion-panel formArrayName="forms" *ngFor="let waypoint of waypoints; index as i">
           <mat-expansion-panel-header>
             <mat-panel-title style="display: flex; align-items: center;">
               <mat-icon>place</mat-icon>
-              {{waypoint.address}}
+              {{waypoint.address}} - {{(waypoint.distanceFromPrevious/1000).toFixed(2)}} km
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <mat-form-field class="full-width" appearance="standard" [formGroupName]="waypoint.position">
+          <mat-form-field class="full-width" appearance="standard" [formGroupName]="i">
             <mat-label>Add a passenger</mat-label>
             <input formControlName="name" matInput>
-            <mat-icon (click)="addTraveller(waypoint.position);" matSuffix>group_add</mat-icon>
+            <mat-icon (click)="addTraveller(i);" matSuffix>group_add</mat-icon>
           </mat-form-field>
-          <div class="example-container">
-            <h2>Travelling</h2>
+          <ng-container *ngIf="getTravelling(i).length != 0 || waypoint.getOut.length != 0">
+            <div class="example-container">
+              <h2>Travelling</h2>
 
-            <div
-              cdkDropList
-              #travellingList="cdkDropList"
-              [cdkDropListData]="getTravelling(waypoint.position)"
-              [cdkDropListConnectedTo]="[leftList]"
-              class="example-list"
-              (cdkDropListDropped)="drop($event)">
-              <div class="example-box" *ngFor="let person of getTravelling(waypoint.position)" cdkDrag>
-                {{person.getFullName()}}
-                <mat-icon (click)="addTraveller(waypoint.position);" matSuffix>delete</mat-icon>
+              <div
+                cdkDropList
+                #travellingList="cdkDropList"
+                [cdkDropListData]="getTravelling(i)"
+                [cdkDropListConnectedTo]="[leftList]"
+                class="example-list"
+                (cdkDropListDropped)="drop($event)">
+                <div class="example-box" *ngFor="let person of getTravelling(i)" cdkDrag [cdkDragDisabled]="waypoint.getInto.includes(person)">
+                  {{person.getFullName()}}
+                  <mat-icon style="cursor: pointer" *ngIf="waypoint.getInto.includes(person)" (click)="deleteTraveller(i, person);" matSuffix>
+                    delete
+                  </mat-icon>
+                </div>
               </div>
             </div>
-          </div>
-          <br>
-          <div class="example-container">
-            <h2>Left</h2>
+            <div class="example-container">
+              <h2>Left</h2>
 
-            <div
-              cdkDropList
-              #leftList="cdkDropList"
-              [cdkDropListData]="waypoint.getOut"
-              [cdkDropListConnectedTo]="[travellingList]"
-              class="example-list"
-              (cdkDropListDropped)="drop($event)">
-              <div class="example-box" *ngFor="let person of waypoint.getOut" cdkDrag>{{person.getFullName()}}</div>
+              <div
+                cdkDropList
+                #leftList="cdkDropList"
+                [cdkDropListData]="waypoint.getOut"
+                [cdkDropListConnectedTo]="[travellingList]"
+                class="example-list"
+                (cdkDropListDropped)="drop($event)">
+                <div class="example-box" *ngFor="let person of waypoint.getOut" cdkDrag>
+                  {{person.getFullName()}}
+                </div>
+              </div>
             </div>
-          </div>
-          <br>
+          </ng-container>
+          <button (click)="deleteWaypoint(i);" class="button full-width" color="warn" mat-button>
+            Delete waypoint
+          </button>
         </mat-expansion-panel>
       </mat-accordion>
     </div>

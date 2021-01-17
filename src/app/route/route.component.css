@@ -8,13 +8,13 @@
 }
 
 .left {
-  flex-grow: 1;
+  flex: 1;
   height: 100vh;
   padding: 20px;
 }
 
 .right {
-  flex-grow: 6;
+  flex-grow: 3;
 }
 
 .full-width {
