@@ -70,11 +70,13 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     const emailInput = this.emailForm;
     this.service.findByEmail(emailInput).subscribe(friend => {
         this.foundUser = friend;
-        const data = {
+        const email = {
           email: this.emailForm
         };
-        this.service.addFriend(1, data).subscribe(user => {
-          window.location.reload();
+        this.service.addFriend(1, email).subscribe(user => {
+          const data = this.dataSource.data;
+          data.push({name: user.name, email: user.email, surname: user.surname, position: data.length});
+          this.dataSource.data = data;
         });
 
       }, (error) => {
@@ -85,19 +87,20 @@ export class FriendsComponent implements OnInit, AfterViewInit{
   }
 
   public deleteFriend(e): void {
-    const data = {
+    const email = {
       email: e.email
     };
 
-    this.service.delete(1, data).subscribe({
+    this.service.delete(1, email).subscribe({
         next: response => {
           console.log('Delete successful');
+          const data = this.dataSource.data.filter(user => user.email !== e.email);
+          this.dataSource.data = data;
         },
         error: error => {
           console.error('There was an error!', error);
         }
       });
-    window.location.reload();
   }
 }
 
