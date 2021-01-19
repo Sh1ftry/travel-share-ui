@@ -22,15 +22,21 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import {ReactiveFormsModule} from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { LoggerModule, NgxLoggerLevel } from 'ngx-logger';
+import { LoginComponent } from './login/login.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { BearerAuthInterceptor } from './bearer-auth.interceptor';
+import { ErrorInterceptor } from './error.interceptor';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
     AppComponent,
     RouteComponent,
     HistoryComponent,
-    FriendsComponent
+    FriendsComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -50,11 +56,16 @@ import { LoggerModule, NgxLoggerLevel } from 'ngx-logger';
     MatCardModule,
     MatExpansionModule,
     MatSnackBarModule,
+    MatProgressSpinnerModule,
     DragDropModule,
     ReactiveFormsModule,
+    MatTabsModule,
     LoggerModule.forRoot({level: NgxLoggerLevel.DEBUG, serverLogLevel: NgxLoggerLevel.OFF})
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: BearerAuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
