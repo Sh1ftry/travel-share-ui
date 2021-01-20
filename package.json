@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --configuration=local",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -22,7 +22,9 @@
     "@angular/platform-browser-dynamic": "~11.0.5",
     "@angular/router": "~11.0.5",
     "@tomtom-international/web-sdk-maps": "^5.68.0",
-    "rxjs": "~6.6.0",
+    "@tomtom-international/web-sdk-services": "^5.68.0",
+    "ngx-logger": "^4.1.9",
+    "rxjs": "^6.6.3",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"
   },
