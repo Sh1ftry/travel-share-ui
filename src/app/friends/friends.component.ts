@@ -5,26 +5,18 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {FriendsService} from './friends.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {NGXLogger} from 'ngx-logger';
+import {AuthenticationService} from '../authentication.service';
+import {User} from '../user';
+import {HttpResponse} from '@angular/common/http';
 
 export interface Friends {
   position: number;
-  name: string;
-  surname: string;
+  first_name: string;
+  last_name: string;
   email: string;
 }
-
-/* const ELEMENT_DATA: Friends[] = [
-  {position: 1, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 2, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 3, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 4, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 5, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 6, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 7, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 8, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 9, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-  {position: 10, name: 'Michal', surname: 'Granda', email: 'michgra097@wp.pl'},
-]; */
 
 @Component({
   selector: 'app-friends',
@@ -37,19 +29,30 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     Validators.email,
   ]);
 
-  displayedColumns: string[] = ['position', 'name', 'surname', 'email', 'delete'];
+  displayedColumns: string[] = ['position', 'first_name', 'last_name', 'email', 'delete'];
   ELEMENT_DATA: Friends[] = [];
   dataSource = new MatTableDataSource<Friends>(this.ELEMENT_DATA);
   emailForm: string;
   foundUser = '';
+  user: User;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  constructor(public dialog: MatDialog, private service: FriendsService) { }
+  constructor(
+    public dialog: MatDialog,
+    private service: FriendsService,
+    private snackBar: MatSnackBar,
+    private logger: NGXLogger,
+    private authService: AuthenticationService,
+  ) { }
+
 
   ngOnInit(): void {
-     this.getAllFriends();
+    this.authService.currentUser.subscribe(user =>
+      this.user = user
+    );
+    this.getAllFriends(this.user.id);
   }
 
   ngAfterViewInit(): void  {
@@ -57,33 +60,60 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     this.dataSource.sort = this.sort;
   }
 
-  public getAllFriends(): void{
-    this.service.getAllByUserId(1).subscribe(friends => {
+  public getAllFriends(id): void{
+    this.service.getAllByUserId(id).subscribe(friends => {
       this.dataSource.data =  friends.map((friend, index) => { return {...friend, position: index + 1};
       } );
     });
   }
 
-  public addFriend(): void{
-
-    let errorText;
+  public addFriend(): void{;
     const emailInput = this.emailForm;
+    this.logger.debug(`Add friends`);
     this.service.findByEmail(emailInput).subscribe(friend => {
         this.foundUser = friend;
         const email = {
           email: this.emailForm
         };
-        this.service.addFriend(1, email).subscribe(user => {
+        this.service.addFriend(this.user.id, email).subscribe(user => {
           const data = this.dataSource.data;
-          data.push({name: user.name, email: user.email, surname: user.surname, position: data.length});
+          data.push({first_name: user.first_name, email: user.email, last_name: user.last_name, position: data.length + 1});
           this.dataSource.data = data;
+          this.logger.debug(`${user.email} added to friends list`);
+        }, error => {
+          this.logger.error(`Error: ${error}`);
+          if (error === 'Not Found')
+          {
+            this.snackBar.open('User with this email does not exist', 'Ok', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+            });
+          }
+          else if (error === 'Bad Request')
+          {
+            this.snackBar.open('You are already friends', 'Ok', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+            });
+          }
+          else {
+            this.snackBar.open('Something went wrong', 'Ok', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+            });
+          }
         });
-
       }, (error) => {
-        errorText = error;
-        console.log(error);
-        this.dialog.open(NoneUserFoundDialogComponent);
-      });
+        this.logger.error(`Error: ${error.status}`);
+        this.snackBar.open('Something went wrong', 'Ok', {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+          });
+        });
   }
 
   public deleteFriend(e): void {
@@ -91,21 +121,24 @@ export class FriendsComponent implements OnInit, AfterViewInit{
       email: e.email
     };
 
-    this.service.delete(1, email).subscribe({
+    this.service.delete(this.user.id, email).subscribe({
         next: response => {
-          console.log('Delete successful');
-          const data = this.dataSource.data.filter(user => user.email !== e.email);
+          this.logger.debug(`Delete successful`);
+          const data = this.dataSource.data.filter(user => user.email !== e.email)
+            .map((user, index) => {
+              user.position = index + 1;
+              return user;
+            });
           this.dataSource.data = data;
+          this.snackBar.open('Friend has been deleted', 'Ok', {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+          });
         },
         error: error => {
-          console.error('There was an error!', error);
+          this.logger.error(`An error occurred: ${error}`);
         }
       });
   }
 }
-
-@Component({
-  selector: 'app-none-user-found-dialog',
-  templateUrl: './nouserdialog.component.html',
-})
-export class NoneUserFoundDialogComponent {}
