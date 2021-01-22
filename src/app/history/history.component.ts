@@ -43,6 +43,7 @@ export class HistoryComponent implements OnInit {
   expandedElement: Route | null;
   columnsParticipants = ['first_name', 'last_name', 'price'];
   dataSourceParticipants = this.routes;
+  columnsWaypoints = ['address'];
 
 
   user: User;

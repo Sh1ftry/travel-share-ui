@@ -133,5 +133,8 @@
       }
     }
   },
-  "defaultProject": "travel-share"
+  "defaultProject": "travel-share",
+  "cli": {
+    "analytics": "762d2822-c9a1-4366-ae31-3570f7408304"
+  }
 }

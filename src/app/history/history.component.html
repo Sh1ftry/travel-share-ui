@@ -32,10 +32,13 @@
              [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
           <div>
             <mat-tab-group color="primary" dynamicHeight class="mat-card">
-              <mat-tab label="Waypoints">
-                <mat-list role="list" class="inline-list">
-                  <mat-list-item *ngFor="let link of element.landmarks"> {{ link.address }} </mat-list-item>
-                </mat-list>
+              <mat-tab label="Waypoints" class="participants_table">
+                <table mat-table [dataSource]="element.landmarks" class="participants">
+                  <ng-container matColumnDef="address">
+                    <td mat-cell class="participants-cell" *matCellDef="let row"> {{row.address}} </td>
+                  </ng-container>
+                  <tr mat-row *matRowDef="let row; columns: columnsWaypoints;"></tr>
+                </table>
               </mat-tab>
               <mat-tab label="Participants" class="participants_table">
                 <table mat-table [dataSource]="element.participants" class="participants">
