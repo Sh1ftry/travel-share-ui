@@ -1,0 +1,81 @@
+.container{
+  display: flow;
+  padding: 20px;
+}
+
+.no-history{
+  align-items: center;
+  vertical-align: center;
+  text-align: center;
+  font-size: 16px;
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  font-size: 16px;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: #efefef;
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: inline-block;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+mat-list-item{
+  margin-left: 10px;
+}
+
+.participants{
+  width: 400px;
+  border: white;
+}
+
+.main-header{
+  font-size: 18px;
+}
+
+.mat-cell{
+  font-size: 15px;
+}
+
+.participants-header {
+  padding: 20px;
+  border-color: white;
+}
+
+.participants-cell {
+  height: 1px;
+  border-color: white;
+  width: 30px;
+}
+
+.participants_table{
+  margin-left: 20px;
+}
+
+.mat-card{
+  text-underline-color: black;
+}
+
+::ng-deep .mat-ink-bar {
+  background-color:#669999 !important;
+}
