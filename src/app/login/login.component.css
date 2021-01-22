@@ -22,3 +22,19 @@
   width: 100%;
   margin-bottom: 10px;
 }
+
+::ng-deep .mat-ink-bar {
+  background-color:#669999 !important;
+}
+
+::ng-deep .mat-form-field-ripple{
+  background-color:#669999 !important;
+}
+
+::ng-deep .mat-form-field-label{
+  color:#669999 !important;
+}
+
+.uploader-status ::ng-deep .mat-progress-spinner circle, .mat-spinner circle {
+  stroke: #669999;
+}

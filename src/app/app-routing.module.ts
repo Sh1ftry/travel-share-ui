@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes} from '@angular/router';
 import { RouteComponent } from './route/route.component';
 import { HistoryComponent } from './history/history.component';
-import { FriendsComponent } from './friends/friends.component';
+import { FriendsComponent} from './friends/friends.component';
 import {LoginComponent} from './login/login.component';
 import {AuthGuard} from './auth.guard';
 
