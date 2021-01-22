@@ -56,3 +56,16 @@ th.mat-sort-header-sorted {
   width: 10%;
 }
 
+.mat-header-cell{
+  font-size: 18px;
+}
+
+.mat-cell{
+  font-size: 15px;
+}
+
+.no-friends{
+  text-align: center;
+  font-size: 16px;
+  padding: 20px;
+}

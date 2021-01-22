@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
+import {FormControl, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
@@ -9,7 +8,6 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {NGXLogger} from 'ngx-logger';
 import {AuthenticationService} from '../authentication.service';
 import {User} from '../user';
-import {HttpResponse} from '@angular/common/http';
 
 export interface Friends {
   position: number;
@@ -40,7 +38,6 @@ export class FriendsComponent implements OnInit, AfterViewInit{
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
-    public dialog: MatDialog,
     private service: FriendsService,
     private snackBar: MatSnackBar,
     private logger: NGXLogger,
@@ -67,7 +64,7 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     });
   }
 
-  public addFriend(): void{;
+  public addFriend(): void{
     const emailInput = this.emailForm;
     this.logger.debug(`Add friends`);
     this.service.findByEmail(emailInput).subscribe(friend => {
@@ -124,12 +121,12 @@ export class FriendsComponent implements OnInit, AfterViewInit{
     this.service.delete(this.user.id, email).subscribe({
         next: response => {
           this.logger.debug(`Delete successful`);
-          const data = this.dataSource.data.filter(user => user.email !== e.email)
+          const tableData = this.dataSource.data.filter(user => user.email !== e.email)
             .map((user, index) => {
               user.position = index + 1;
               return user;
             });
-          this.dataSource.data = data;
+          this.dataSource.data = tableData;
           this.snackBar.open('Friend has been deleted', 'Ok', {
             duration: 5000,
             horizontalPosition: 'center',
