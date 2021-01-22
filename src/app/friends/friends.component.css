@@ -69,3 +69,11 @@ th.mat-sort-header-sorted {
   font-size: 16px;
   padding: 20px;
 }
+
+::ng-deep .mat-form-field-ripple{
+  background-color:#669999 !important;
+}
+
+::ng-deep .mat-form-field-label{
+  color:#669999 !important;
+}
