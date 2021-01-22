@@ -22,3 +22,7 @@
   width: 100%;
   margin-bottom: 10px;
 }
+
+::ng-deep .mat-ink-bar {
+  background-color:#669999 !important;
+}
