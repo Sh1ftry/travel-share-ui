@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  tomtomApiKey: '',
-  apiUrl: 'http://127.0.0.1:8000',
+  tomtomApiKey: 'API_KEY',
+  apiUrl: 'http://35.232.93.120',
 };
