@@ -8,12 +8,18 @@ import {FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Valida
 import {NGXLogger} from 'ngx-logger';
 import {environment} from '../../environments/environment';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {RouteService} from './route.service';
+import {User} from '../user';
+import {AuthenticationService} from '../authentication.service';
+import {FriendsService} from '../friends/friends.service';
+import {Router} from '@angular/router';
 
 
 export class Person {
   constructor(
     public name: string,
     public surname: string,
+    public email: string,
   ) {}
 
   getFullName(): string {
@@ -45,11 +51,18 @@ export class RouteComponent implements OnInit {
   routeDetailsForm: FormGroup;
   waypointsForms: FormGroup;
 
+  user: User;
+  travellers: any[] = [];
+
   constructor(
     private tomTomService: TomTomService,
     private formBuilder: FormBuilder,
     private logger: NGXLogger,
     private snackBar: MatSnackBar,
+    private routeService: RouteService,
+    private authService: AuthenticationService,
+    private friendsService: FriendsService,
+    private router: Router
   ) {
     this.createForms();
   }
@@ -111,6 +124,23 @@ export class RouteComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.authService.currentUser.subscribe(user => {
+        this.user = user;
+        if (user)
+        {
+          this.friendsService.getAllByUserId(user.id).subscribe(friends => {
+              this.travellers = friends;
+              this.travellers.push({
+                email: user.email,
+                first_name: user.firstName,
+                last_name: user.lastName,
+              });
+              this.logger.debug(`User and its friends retrieved ${JSON.stringify(this.travellers)}`);
+            }
+          );
+        }
+      }
+    );
     const center = [19.356389, 52.196667];
     this.map = tt.map({
       key: environment.tomtomApiKey,
@@ -157,19 +187,19 @@ export class RouteComponent implements OnInit {
     const lastWaypointIndex = this.waypoints.length - 1;
     this.waypoints.forEach((waypoint, index) => {
       waypoint.getInto.forEach(person => {
-        if (travellers[person.getFullName()] === undefined)
+        if (travellers[person.email] === undefined)
         {
-          travellers[person.getFullName()] = [];
+          travellers[person.email] = [];
         }
         const segment = {
           getIn: index,
           getOut: lastWaypointIndex
         };
-        this.logger.debug(`Adding ${JSON.stringify(segment)} segment for ${person.getFullName()}`);
-        travellers[person.getFullName()].push(segment);
+        this.logger.debug(`Adding ${JSON.stringify(segment)} segment for ${person.email}`);
+        travellers[person.email].push(segment);
       });
       waypoint.getOut.forEach(person => {
-        travellers[person.getFullName()].forEach(segment => {
+        travellers[person.email].forEach(segment => {
           if (segment.getOut === lastWaypointIndex) {
             segment.getOut = index;
           }
@@ -220,6 +250,40 @@ export class RouteComponent implements OnInit {
     });
 
     this.logger.debug(`Final shares ${JSON.stringify(priceShares)}`);
+
+    const date = this.routeDetailsForm.controls.date.value;
+    const offset = date.getTimezoneOffset();
+    const dateOffset = new Date(date.getTime() - (offset * 60 * 1000));
+    const properDate =  dateOffset.toISOString().split('T')[0];
+
+    this.routeService.addRoute({
+      name: this.routeDetailsForm.controls.routeName.value,
+      date: properDate,
+      length: (routeLength / 1000).toFixed(2),
+      fuel_price: fuelPrice.toFixed(2),
+      fuel_consumption: averageFuelConsumption.toFixed(2),
+      landmarks: this.waypoints.map(waypoint => {
+        return {
+          address: waypoint.address
+      };
+      }),
+      participants: Object.keys(priceShares).map(email => {
+        return {
+          participant: {
+            email
+          },
+          price: priceShares[email].toFixed(2)
+        };
+      })
+    }).subscribe(_ => {
+      this.router.navigate(['/history']);
+    }, _ => {
+      this.snackBar.open('Could not add route. Try again later :(', 'Ok', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+      });
+    });
   }
 
   cancel(): void {
@@ -229,11 +293,34 @@ export class RouteComponent implements OnInit {
   addTraveller(index: number): void {
     this.logger.debug(`Adding traveller to waypoint ${index}`);
     const forms = this.waypointsForms.controls.forms as FormArray;
-    const person = forms.at(index).value.name;
+    const email = forms.at(index).value.name;
     forms.at(index).setValue({
       name: ''
     });
-    this.waypoints[index].getInto.push(new Person(person, ''));
+    const friend = this.travellers.filter(f => f.email === email)[0];
+    if (this.getTravelling(this.waypoints.length - 1).filter(person => person.email === friend.email).length > 0)
+    {
+      this.snackBar.open('This person is already travelling', 'Ok', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+      });
+    }
+    else
+    {
+      if (friend)
+      {
+        this.waypoints[index].getInto.push(new Person(friend.first_name, friend.last_name, email));
+      }
+      else
+      {
+        this.snackBar.open('You don\'t have a friend with this email', 'Ok', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
+      }
+    }
   }
 
   deleteTraveller(index: number, person: Person): void {

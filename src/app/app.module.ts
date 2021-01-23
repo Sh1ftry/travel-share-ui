@@ -34,6 +34,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {LoggerModule, NgxLoggerLevel } from 'ngx-logger';
 import {MatListModule} from '@angular/material/list';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 @NgModule({
   declarations: [
@@ -75,6 +76,7 @@ import {MatListModule} from '@angular/material/list';
     MatTabsModule,
     MatSnackBarModule,
     MatListModule,
+    MatAutocompleteModule,
     LoggerModule.forRoot({level: NgxLoggerLevel.DEBUG, serverLogLevel: NgxLoggerLevel.OFF})
   ],
   providers: [

@@ -63,7 +63,7 @@ export class HistoryComponent implements OnInit {
 
   public getAllRoutes(): void{
     this.service.getAllByUserId(this.user.id).subscribe(routes => {
-      this.routes = routes;
+      this.routes = routes.reverse();
       this.dataSource = this.routes;
     } );
   }
