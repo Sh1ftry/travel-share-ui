@@ -1,3 +1,5 @@
 export const environment = {
-  production: true
+  production: true,
+  tomtomApiKey: 'API_KEY',
+  apiUrl: 'https://travelshare.cvapr.xyz',
 };

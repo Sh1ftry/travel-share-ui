@@ -1,0 +1,72 @@
+<div class="container">
+  <mat-card class="example-card">
+    <mat-tab-group mat-align-tabs="center" dynamicHeight>
+      <mat-tab label="Login">
+        <div [formGroup]="loginForm" class="tab-container">
+          <mat-form-field class="full-width">
+            <mat-label>Email</mat-label>
+            <input name="username" type="email" matInput formControlName="email">
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Password</mat-label>
+            <input type="password" matInput formControlName="password">
+          </mat-form-field>
+          <button class="button" (click)="login();" mat-raised-button>Log in</button>
+        </div>
+      </mat-tab>
+      <mat-tab label="Register">
+        <div [formGroup]="registerForm" class="tab-container">
+          <mat-form-field class="full-width">
+            <mat-label>Name</mat-label>
+            <input type="text" matInput formControlName="name">
+            <mat-error *ngIf="registerForm.controls.name.errors?.required">
+              Name is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Surname</mat-label>
+            <input type="text" matInput formControlName="surname">
+            <mat-error *ngIf="registerForm.controls.surname.errors?.required">
+              Surname is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Email</mat-label>
+            <input type="email" matInput formControlName="email">
+            <mat-error
+              *ngIf="registerForm.controls.email.hasError('email') && !registerForm.controls.email.hasError('required')"
+            >
+              Please enter a valid email address
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls.email.hasError('required')">
+              Email is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Password</mat-label>
+            <input type="password" matInput formControlName="password">
+            <mat-error
+              *ngIf="registerForm.controls.password.errors?.minlength && !registerForm.controls.password.errors?.required"
+            >
+              Please enter a password with at least 8 characters
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls.password.errors?.required">
+              Password is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Repeat password</mat-label>
+            <input type="password" matInput formControlName="repeatPassword">
+            <mat-error *ngIf="registerForm.controls.repeatPassword.errors?.mustMatch">
+              Passwords must match
+            </mat-error>
+          </mat-form-field>
+          <button class="button" (click)="register();" mat-raised-button>Register</button>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+  <div class="uploader-status">
+    <mat-spinner *ngIf="spin"></mat-spinner>
+  </div>
+</div>
